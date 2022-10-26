@@ -3,6 +3,8 @@ pragma solidity ^0.8.17;
 
 import "hardhat/console.sol";
 
+// Goerli : 0x7bd43F22167B7f066eeA06b80d992957EdBB413a
+
 contract GalaxyPortal {
   uint256 totalStars;
   mapping (address => uint256) explorerStars;
