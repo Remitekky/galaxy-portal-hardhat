@@ -1,32 +1,37 @@
 const main = async () => {
   // hre is the Hardhat global object containing all the tools and config to use in the project
 
-  const [owner, randomPerson] = await hre.ethers.getSigners();
-  // Compile th econtract and generate the artifact json file. This file is used to interact with the SM on the blockchain
+  const [owner, signer1, signer2] = await hre.ethers.getSigners();
+  // Compile the contract and generate the artifact json file. This file is used to interact with the SM on the blockchain
   const galaxyContractFactory = await hre.ethers.getContractFactory("GalaxyPortal");
   // Deploy the contract on a local Ethereum network. This local network is destroy juste after the deployment
   const galaxyContract = await galaxyContractFactory.deploy();
   // Waiting the deployement & execution of the contract on the local blockchain. This will execute the constructor of the contract
   await galaxyContract.deployed();
-  // Log the address where the contract is deployed
+
   console.log("Contract deployed to : ", galaxyContract.address);
-
   console.log("contract deployed by : ", owner.address);
+  console.log("Others addresses : %s and %s", signer1.address, signer2.address);
 
-  await galaxyContract.getTotalStars();
+  let countStars;
+  // View function don't send a transaction. So we don't have to wait the Txn to be minned
+  countStars = await galaxyContract.getTotalStars();
+  // galaxyContract.getTotalStars() return a uint256 : it's a bigNumber. We have to parse it as a number
+  console.log(countStars.toNumber());
   
-  const firstStarTxn = await galaxyContract.star();
+  // Execute the function to write on the SM's state. It's send a transaction to the BC
+  const firstStarTxn = await galaxyContract.star("A message");
+  // Waiting the transaction to be minned
   await firstStarTxn.wait();
 
-  await galaxyContract.getTotalStars();
-
-  const secondStarTxn = await galaxyContract.connect(randomPerson).star();
+  const secondStarTxn = await galaxyContract.connect(signer1).star("Another message");
   await secondStarTxn.wait();
 
-  await galaxyContract.getTotalStars();
-  await galaxyContract.getExplorers();
-  await galaxyContract.getExplorerStars(owner.address);
-  await galaxyContract.getExplorerStars(randomPerson.address);
+  countStars = await galaxyContract.getTotalStars();
+  console.log(countStars.toNumber());
+
+  const allStars = await galaxyContract.getAllStars();
+  console.log(allStars);
 };
 
 const runMain = async () => {

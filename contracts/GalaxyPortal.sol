@@ -3,32 +3,33 @@ pragma solidity ^0.8.17;
 
 import "hardhat/console.sol";
 
-// Goerli : 0x7bd43F22167B7f066eeA06b80d992957EdBB413a
+// Goerli : 0xBdBaE474bEEBC90534068F68440E118b72d276b9
 
 contract GalaxyPortal {
   uint256 totalStars;
-  mapping (address => uint256) explorerStars;
-  address[] explorers;
+
+  struct Star {
+    address explorer;
+    string message;
+    uint256 timestamp;
+  }
+
+  Star[] stars;
+
+  event NewStar(address indexed from, uint256 timestamp, string message);
 
   constructor() {
     console.log("Let's build something cool");
   }
 
-  function star() public {
+  function star(string memory _message) public {
     totalStars += 1;
-    explorerStars[msg.sender] += 1;
-    explorers.push(msg.sender);
-    console.log("%s give you a star !", msg.sender);
+    stars.push(Star(msg.sender, _message, block.timestamp));
+    console.log("%s send a star w/ message %s", msg.sender, _message);
   }
 
-  function getExplorerStars(address _explorer) public view returns (uint256) {
-    console.log("%s give you %d star(s) !", msg.sender, explorerStars[_explorer]);
-    return explorerStars[_explorer];
-  }
-
-  function getExplorers() public view returns (address[] memory) {
-    console.log("you have %d web3 space explorers !", explorers.length);
-    return explorers;
+  function getAllStars() public view returns (Star[] memory) {
+    return stars;
   }
 
   function getTotalStars() public view returns (uint256) {
