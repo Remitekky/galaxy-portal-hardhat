@@ -5,7 +5,10 @@ const main = async () => {
   // Compile the contract and generate the artifact json file. This file is used to interact with the SM on the blockchain
   const galaxyContractFactory = await hre.ethers.getContractFactory("GalaxyPortal");
   // Deploy the contract on a local Ethereum network. This local network is destroy juste after the deployment
-  const galaxyContract = await galaxyContractFactory.deploy();
+  const galaxyContract = await galaxyContractFactory.deploy({
+    // We fund the contract with ethers on deployment
+    value: hre.ethers.utils.parseEther("0.1"),
+  });
   // Waiting the deployement & execution of the contract on the local blockchain. This will execute the constructor of the contract
   await galaxyContract.deployed();
 
@@ -13,24 +16,30 @@ const main = async () => {
   console.log("contract deployed by : ", owner.address);
   console.log("Others addresses : %s and %s", signer1.address, signer2.address);
 
-  let countStars;
-  // View function don't send a transaction. So we don't have to wait the Txn to be minned
-  countStars = await galaxyContract.getTotalStars();
-  // galaxyContract.getTotalStars() return a uint256 : it's a bigNumber. We have to parse it as a number
-  console.log(countStars.toNumber());
-  
-  // Execute the function to write on the SM's state. It's send a transaction to the BC
-  const firstStarTxn = await galaxyContract.star("A message");
-  // Waiting the transaction to be minned
-  await firstStarTxn.wait();
+  // Log contract balance
+  let contractBalance = await hre.ethers.provider.getBalance(
+    galaxyContract.address
+  );
+  console.log(
+    "Contract balance : ",
+    hre.ethers.utils.formatEther(contractBalance)
+  );
 
-  const secondStarTxn = await galaxyContract.connect(signer1).star("Another message");
-  await secondStarTxn.wait();
+  // Throw a star with a message
+  const starTxn = await galaxyContract.star("A message");
+  starTxn.wait();
 
-  countStars = await galaxyContract.getTotalStars();
-  console.log(countStars.toNumber());
+  // Log contract balance
+  contractBalance = await hre.ethers.provider.getBalance(
+    galaxyContract.address
+  );
+  console.log(
+    "Contract balance : ",
+    hre.ethers.utils.formatEther(contractBalance)
+  );
 
-  const allStars = await galaxyContract.getAllStars();
+  // Log all the start throwed
+  let allStars = await galaxyContract.getAllStars();
   console.log(allStars);
 };
 

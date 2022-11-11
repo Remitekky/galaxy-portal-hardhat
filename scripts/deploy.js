@@ -6,7 +6,9 @@ const main = async () => {
   console.log("Account balance: ", accountBalance.toString());
 
   const galaxyContractFactory = await hre.ethers.getContractFactory("GalaxyPortal");
-  const galaxyContract = await galaxyContractFactory.deploy();
+  const galaxyContract = await galaxyContractFactory.deploy({
+    value: hre.ethers.utils.parseEther("0.001"),
+  });
   await galaxyContract.deployed();
 
   console.log("Contract deployed at : ", galaxyContract.address);
