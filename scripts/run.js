@@ -25,8 +25,11 @@ const main = async () => {
     hre.ethers.utils.formatEther(contractBalance)
   );
 
-  // Throw a star with a message
+  // Throw 2 stars with a message
   const starTxn = await galaxyContract.star("A message");
+  starTxn.wait();
+
+  const starTxn2 = await galaxyContract.star("A second message");
   starTxn.wait();
 
   // Log contract balance
